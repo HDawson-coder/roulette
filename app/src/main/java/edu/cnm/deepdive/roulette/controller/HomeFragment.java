@@ -41,18 +41,17 @@ public class HomeFragment extends Fragment {
   public View onCreateView(@NonNull LayoutInflater inflater,
       ViewGroup container, Bundle savedInstanceState) {
     binding = FragmentHomeBinding.inflate(inflater, container, false);
-    binding.spinWheel.setOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        if (!spinning) {
-          spinning = true;
-          binding.spinWheel.setEnabled(false);
-          binding.rouletteValue.setVisibility(View.INVISIBLE);
-          homeViewModel.spinWheel();
-        }
-      }
-    });
+    binding.spinWheel.setOnClickListener((v) -> spinWheel());
     return binding.getRoot();
+  }
+
+  private void spinWheel() {
+    if (!spinning) {
+      spinning = true;
+      binding.spinWheel.setEnabled(false);
+      binding.rouletteValue.setVisibility(View.INVISIBLE);
+      homeViewModel.spinWheel();
+    }
   }
 
   //after initial start up. Constantly changing during app use.
@@ -60,30 +59,25 @@ public class HomeFragment extends Fragment {
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
     homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-    homeViewModel.getRouletteValue().observe(getViewLifecycleOwner(), new Observer<String>() {
-      @Override
-      public void onChanged(String s) {
-        binding.rouletteValue.setText(s);
-      }
-    });
-    homeViewModel.getPocketIndex().observe(getViewLifecycleOwner(), new Observer<Integer>() {
-      @Override
-      public void onChanged(Integer pocketIndex) {
-        float centerX = binding.rouletteWheel.getWidth() / 2f;
-        float centerY = binding.rouletteWheel.getHeight() / 2f;
-        float currentRotation = binding.rouletteWheel.getRotation();
-        float finalRotation = -DEGREES_PER_REVOLUTION * pocketIndex / (float) HomeViewModel.POCKETS_ON_WHEEL;
-        binding.rouletteWheel.setPivotX(centerX);
-        binding.rouletteWheel.setPivotX(centerY);
-        RotateAnimation rotation = new RotateAnimation(
-            0,
-            (finalRotation - currentRotation) - DEGREES_PER_REVOLUTION * (MIN_FULL_ROTATIONS + rng.nextInt(
-                    MAX_FULL_ROTATIONS - MIN_FULL_ROTATIONS +1)), centerX, centerY);
-        rotation.setDuration(MIN_ROTATION_TIME + rng.nextInt(MAX_ROTATION_TIME));
-        rotation.setAnimationListener(new AnimationFinalizer(finalRotation));
-        binding.rouletteWheel.startAnimation(rotation);
-      }
-    });
+    homeViewModel.getRouletteValue().observe(getViewLifecycleOwner(),
+        (s) -> binding.rouletteValue.setText(s));
+    homeViewModel.getPocketIndex().observe(getViewLifecycleOwner(), this::startAnimation);
+  }
+
+  private void startAnimation(Integer pocketIndex) {
+    float centerX = binding.rouletteWheel.getWidth() / 2f;
+    float centerY = binding.rouletteWheel.getHeight() / 2f;
+    float currentRotation = binding.rouletteWheel.getRotation();
+    float finalRotation = -DEGREES_PER_REVOLUTION * pocketIndex / (float) HomeViewModel.POCKETS_ON_WHEEL;
+    binding.rouletteWheel.setPivotX(centerX);
+    binding.rouletteWheel.setPivotX(centerY);
+    RotateAnimation rotation = new RotateAnimation(
+        0,
+        (finalRotation - currentRotation) - DEGREES_PER_REVOLUTION * (MIN_FULL_ROTATIONS + rng.nextInt(
+                MAX_FULL_ROTATIONS - MIN_FULL_ROTATIONS +1)), centerX, centerY);
+    rotation.setDuration(MIN_ROTATION_TIME + rng.nextInt(MAX_ROTATION_TIME));
+    rotation.setAnimationListener(new AnimationFinalizer(finalRotation));
+    binding.rouletteWheel.startAnimation(rotation);
   }
 
   private class AnimationFinalizer implements AnimationListener {

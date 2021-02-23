@@ -46,4 +46,5 @@ public class Spin {
   public void setValue(Integer value) {
     this.value = value;
   }
+
 }

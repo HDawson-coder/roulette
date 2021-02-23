@@ -7,10 +7,12 @@ import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
 import edu.cnm.deepdive.roulette.model.entity.Spin;
+import edu.cnm.deepdive.roulette.model.pojo.SpinWithWagers;
 import io.reactivex.Single;
+import java.util.Collection;
 import java.util.List;
 
-@Dao
+@Dao // One Dao per entity
 public interface SpinDao {
 
   @Insert
@@ -20,12 +22,17 @@ public interface SpinDao {
   Single<Integer> update(Spin spin);
 
   @Delete
-  Single<Integer> delete (Spin spin);
+  Single<Integer> delete (Spin spin); // a single spin
 
   @Delete
-  Single<Integer> delete (Spin... spin);
+  Single<Integer> delete (Spin... spin); // a whole bunch of spins
+
+  @Delete
+  Single<Integer> delete(Collection<Spin> spins); // a collection of spins
 
   @Query("SELECT * FROM Spin ORDER BY timestamp DESC")
   LiveData<List<Spin>> selectAll();
 
+  @Query("SELECT * FROM Spin WHERE spin_id = :spinId")
+  LiveData<SpinWithWagers> selectById(long spinId);
 }

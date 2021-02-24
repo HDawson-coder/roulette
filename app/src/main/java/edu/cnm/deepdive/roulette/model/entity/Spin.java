@@ -10,7 +10,6 @@ import java.util.Date;
 public class Spin {
 
   @PrimaryKey(autoGenerate = true)
-
   @ColumnInfo(name = "spin_id")
   private long id;
 

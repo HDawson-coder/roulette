@@ -67,7 +67,7 @@ public class PlayFragment extends Fragment {
     getLifecycle().addObserver(playViewModel); //method invocation because of lowercase get
     playViewModel.getRouletteValue().observe(getViewLifecycleOwner(),
         (s) -> binding.rouletteValue.setText(s));
-    playViewModel.getPocketIndex().observe(getViewLifecycleOwner(), this::startAnimation);
+    playViewModel.getPocketIndex().observe(getViewLifecycleOwner(), this::rotateToPocket);
     playViewModel.getThrowable().observe(getViewLifecycleOwner(), (throwable) -> {
       if (throwable != null) {
         //noinspection ConstantConditions
@@ -77,20 +77,25 @@ public class PlayFragment extends Fragment {
     });
   }
 
-  private void startAnimation(Integer pocketIndex) {
-    float centerX = binding.rouletteWheel.getWidth() / 2f;
-    float centerY = binding.rouletteWheel.getHeight() / 2f;
-    float currentRotation = binding.rouletteWheel.getRotation();
-    float finalRotation = -DEGREES_PER_REVOLUTION * pocketIndex / (float) PlayViewModel.POCKETS_ON_WHEEL;
-    binding.rouletteWheel.setPivotX(centerX);
-    binding.rouletteWheel.setPivotX(centerY);
-    RotateAnimation rotation = new RotateAnimation(
-        0,
-        (finalRotation - currentRotation) - DEGREES_PER_REVOLUTION * (MIN_FULL_ROTATIONS + rng.nextInt(
-                MAX_FULL_ROTATIONS - MIN_FULL_ROTATIONS +1)), centerX, centerY);
-    rotation.setDuration(MIN_ROTATION_TIME + rng.nextInt(MAX_ROTATION_TIME));
-    rotation.setAnimationListener(new AnimationFinalizer(finalRotation));
-    binding.rouletteWheel.startAnimation(rotation);
+  private void rotateToPocket(Integer pocketIndex) {
+    float finalRotation =
+        -DEGREES_PER_REVOLUTION * pocketIndex / (float) PlayViewModel.POCKETS_ON_WHEEL;
+    if (spinning) {
+      float centerX = binding.rouletteWheel.getWidth() / 2f;
+      float centerY = binding.rouletteWheel.getHeight() / 2f;
+      float currentRotation = binding.rouletteWheel.getRotation();
+      binding.rouletteWheel.setPivotX(centerX);
+      binding.rouletteWheel.setPivotX(centerY);
+      RotateAnimation rotation = new RotateAnimation(
+          0,
+          (finalRotation - currentRotation) - DEGREES_PER_REVOLUTION * (MIN_FULL_ROTATIONS + rng.nextInt(
+                  MAX_FULL_ROTATIONS - MIN_FULL_ROTATIONS +1)), centerX, centerY);
+      rotation.setDuration(MIN_ROTATION_TIME + rng.nextInt(MAX_ROTATION_TIME));
+      rotation.setAnimationListener(new AnimationFinalizer(finalRotation));
+      binding.rouletteWheel.startAnimation(rotation);
+    } else {
+      binding.rouletteWheel.setRotation(finalRotation);
+    }
   }
 
   private class AnimationFinalizer implements AnimationListener {

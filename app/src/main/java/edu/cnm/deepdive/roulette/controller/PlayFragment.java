@@ -77,6 +77,12 @@ public class PlayFragment extends Fragment {
     });
   }
 
+  @Override
+  public void onStop() {
+    binding.rouletteWheel.clearAnimation();
+    super.onStop();
+  }
+
   private void rotateToPocket(Integer pocketIndex) {
     float finalRotation =
         -DEGREES_PER_REVOLUTION * pocketIndex / (float) PlayViewModel.POCKETS_ON_WHEEL;

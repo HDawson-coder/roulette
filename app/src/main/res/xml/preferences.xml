@@ -13,4 +13,20 @@
     android:title="@string/minimum_wager_title"
     android:summary="@string/minimum_wager_summary"/>
 
+  <SeekBarPreference
+    android:key="starting_pot_key"
+    android:title="Starting Pot"
+    android:summary="Number of chips available at the start of a game"
+    app:min="25"
+    android:max="500"
+    app:seekBarIncrement="25"
+    app:showSeekBarValue="true"/>
+
+  <SwitchPreference
+    android:key="let_it_ride"
+    android:title="Let it ride!"
+    android:summary="Controls whether winning wagers (and the payouts) remain on the table for the next spin, by default."
+    android:defaultValue="false"/>
+
+
 </PreferenceScreen>

@@ -47,23 +47,27 @@ public class MainActivity extends AppCompatActivity {
   @Override
   public boolean onOptionsItemSelected(@NonNull MenuItem item) {
     boolean handled = true;
-    //noinspection SwitchStatementWithTooFewBranches
     switch (item.getItemId()) {
       case R.id.sign_out:
-        GoogleSignInService
-            .getInstance() // getting the instance of google sign in services
-            .signOut() // signing out
-        .addOnCompleteListener((ignored) ->  //waits for button to be pushed basically
-          startActivity( //once button is pushed this happens
-              new Intent(this, LoginActivity.class)
-                  .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
-          )
-        );
+        signOut();
+        break;
+      case R.id.settings:
+        navController.navigate(R.id.navigation_settings);
         break;
         // Add more cases as necessary
       default:
         handled = super.onOptionsItemSelected(item);
     }
     return handled;
+  }
+
+  private void signOut() {
+    GoogleSignInService
+        .getInstance() // getting the instance of google sign in services
+        .signOut() // signing out
+    .addOnCompleteListener((ignored) ->  //waits for button to be pushed basically
+      startActivity( //once button is pushed this happens
+          new Intent(this, LoginActivity.class)
+              .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)));
   }
 }

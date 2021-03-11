@@ -9,12 +9,11 @@ import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.OnLifecycleEvent;
-import androidx.lifecycle.ViewModel;
 import edu.cnm.deepdive.roulette.R;
 import edu.cnm.deepdive.roulette.model.pojo.SpinWithWagers;
+import edu.cnm.deepdive.roulette.service.PreferenceRepository;
 import edu.cnm.deepdive.roulette.service.SpinRepository;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Consumer;
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -24,10 +23,12 @@ public class PlayViewModel extends AndroidViewModel implements LifecycleObserver
 
   private final MutableLiveData<String> rouletteValue;
   private final MutableLiveData<Integer> pocketIndex;
+  private final MutableLiveData<Long> currentPot;
   private final MutableLiveData<Throwable> throwable;
   private final Random rng;
   private final String[] pocketValues;
-  private final SpinRepository repository;
+  private final SpinRepository spinRepository;
+  private final PreferenceRepository preferenceRepository;
   private final CompositeDisposable pending; //to be disposed if app is closed
 
   public PlayViewModel(@NonNull Application application) { //Constructor
@@ -35,10 +36,13 @@ public class PlayViewModel extends AndroidViewModel implements LifecycleObserver
     pocketValues = application.getResources().getStringArray(R.array.pocket_values);
     rouletteValue = new MutableLiveData<>("00");
     pocketIndex = new MutableLiveData<>();
+    currentPot = new MutableLiveData<>();
     throwable = new MutableLiveData<>();
     rng = new SecureRandom();
-    repository = new SpinRepository(application);
+    spinRepository = new SpinRepository(application);
+    preferenceRepository = new PreferenceRepository(application);
     pending = new CompositeDisposable();
+    newGame();
   } //calling new objects
 
 
@@ -61,13 +65,19 @@ public class PlayViewModel extends AndroidViewModel implements LifecycleObserver
     SpinWithWagers spin = new SpinWithWagers();
     spin.setValue(pocketValues[selection]);
     pending.add(
-        repository.save(spin)
+        spinRepository.save(spin)
             .subscribe(
                 (s) -> { //lambda
                 },
                 this::handleThrowable //method reference (instance/class :: method)
             )
     );
+  }
+
+  public void newGame() {
+    currentPot.setValue((long) preferenceRepository.getStartingPot());
+    pocketIndex.setValue(0);
+    rouletteValue.setValue(pocketValues[0]);
   }
 
   private void handleThrowable(Throwable throwable) { //throw away bucket when app stops

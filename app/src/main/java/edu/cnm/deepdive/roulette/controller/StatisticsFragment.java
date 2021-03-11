@@ -4,15 +4,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import edu.cnm.deepdive.roulette.R;
 import edu.cnm.deepdive.roulette.adapter.ValueCountAdapter;
 import edu.cnm.deepdive.roulette.databinding.FragmentStatisticsBinding;
-import edu.cnm.deepdive.roulette.model.view.ValueCount;
 import edu.cnm.deepdive.roulette.viewmodel.StatisticsViewModel;
 
 public class StatisticsFragment extends Fragment {

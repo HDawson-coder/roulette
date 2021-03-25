@@ -4,15 +4,15 @@
   xmlns:app="http://schemas.android.com/apk/res-auto">
 
   <SeekBarPreference
-    android:key="@string/minimum_wager_key"
-    app:min="@integer/minimum_wager_min"
+    android:key="@string/maximum_wager_key"
+    app:min="@integer/maximum_wager_min"
     android:icon="@drawable/ic_min_wager"
-    android:max="@integer/minimum_wager_max"
-    android:defaultValue="@integer/minimum_wager_default"
-    app:seekBarIncrement="@integer/minimum_wager_increment"
+    android:max="@integer/maximum_wager_max"
+    android:defaultValue="@integer/maximum_wager_default"
+    app:seekBarIncrement="@integer/maximum_wager_increment"
     app:showSeekBarValue="true"
-    android:title="@string/minimum_wager_title"
-    android:summary="@string/minimum_wager_summary"/>
+    android:title="@string/maximum_wager_title"
+    android:summary="@string/maximum_wager_summary"/>
 
 
   <SeekBarPreference

@@ -1,9 +1,13 @@
 package edu.cnm.deepdive.roulette.model.type;
 
 import androidx.room.TypeConverter;
+import com.google.gson.annotations.SerializedName;
 
 public enum Color {
-  BLACK, RED, GREEN;
+
+  BLACK,
+  RED,
+  GREEN;
 
   @TypeConverter
   public static Integer colorToInteger(Color value) {

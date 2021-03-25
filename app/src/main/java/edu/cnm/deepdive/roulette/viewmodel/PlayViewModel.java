@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.OnLifecycleEvent;
 import edu.cnm.deepdive.roulette.R;
 import edu.cnm.deepdive.roulette.model.pojo.SpinWithWagers;
+import edu.cnm.deepdive.roulette.service.ConfigurationRepository;
 import edu.cnm.deepdive.roulette.service.PreferenceRepository;
 import edu.cnm.deepdive.roulette.service.SpinRepository;
 import io.reactivex.disposables.CompositeDisposable;
@@ -30,6 +31,7 @@ public class PlayViewModel extends AndroidViewModel implements LifecycleObserver
   private final SpinRepository spinRepository;
   private final PreferenceRepository preferenceRepository;
   private final CompositeDisposable pending; //to be disposed if app is closed
+  private final ConfigurationRepository configurationRepository;
 
   public PlayViewModel(@NonNull Application application) { //Constructor
     super(application);
@@ -41,6 +43,7 @@ public class PlayViewModel extends AndroidViewModel implements LifecycleObserver
     rng = new SecureRandom();
     spinRepository = new SpinRepository(application);
     preferenceRepository = new PreferenceRepository(application);
+    configurationRepository = ConfigurationRepository.getInstance(); //uses get instance because it's private
     pending = new CompositeDisposable();
     newGame();
   } //calling new objects

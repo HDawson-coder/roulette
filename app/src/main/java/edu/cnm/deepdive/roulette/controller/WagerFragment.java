@@ -47,8 +47,9 @@ public class WagerFragment extends Fragment {
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    viewModel = new ViewModelProvider(getActivity()).get(PlayViewModel.class);
     LifecycleOwner lifecycleOwner = getViewLifecycleOwner();
+    viewModel = new ViewModelProvider(getActivity()).get(PlayViewModel.class);
+   getLifecycle().addObserver(viewModel);
     viewModel.getWagerSpots().observe(lifecycleOwner, this::setupAdapter);
     viewModel.getMaxWager().observe(lifecycleOwner, this::updateMaxWager);
     viewModel.getWagers().observe(lifecycleOwner, this::updateWagers);

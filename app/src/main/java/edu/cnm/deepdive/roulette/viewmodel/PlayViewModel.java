@@ -11,8 +11,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.OnLifecycleEvent;
 import edu.cnm.deepdive.roulette.R;
+import edu.cnm.deepdive.roulette.model.dto.ColorDto;
 import edu.cnm.deepdive.roulette.model.dto.PocketDto;
 import edu.cnm.deepdive.roulette.model.dto.WagerSpot;
+import edu.cnm.deepdive.roulette.model.entity.Wager;
 import edu.cnm.deepdive.roulette.model.pojo.SpinWithWagers;
 import edu.cnm.deepdive.roulette.service.ConfigurationRepository;
 import edu.cnm.deepdive.roulette.service.PreferenceRepository;
@@ -44,7 +46,8 @@ public class PlayViewModel extends AndroidViewModel implements LifecycleObserver
     super(application);
     spinRepository = new SpinRepository(application);
     preferenceRepository = new PreferenceRepository(application);
-    configurationRepository = ConfigurationRepository.getInstance(); //uses get instance because it's private
+    configurationRepository = ConfigurationRepository.getInstance();
+    //uses get instance because private
     pockets = new MutableLiveData<>(configurationRepository.getPockets());
     rouletteValue = new MutableLiveData<>();
     pocketIndex = new MutableLiveData<>();
@@ -92,26 +95,57 @@ public class PlayViewModel extends AndroidViewModel implements LifecycleObserver
   }
 
   public void spinWheel() {
-    List<PocketDto> pockets = this.pockets.getValue();
-    int selection = rng.nextInt(pockets.size());
-    pocketIndex.setValue(selection);
-    rouletteValue.setValue(pockets.get(selection));
-    SpinWithWagers spin = new SpinWithWagers();
-    spin.setValue(pockets.get(selection).getName());
+    SpinWithWagers spin = generateOutcome();
     pending.add(
         spinRepository.save(spin)
             .subscribe(
-                (s) -> {
-                },
+                this::update,
                 this::handleThrowable //method reference (instance/class :: method)
             )
     );
   }
 
+  @SuppressWarnings("ConstantConditions")
+  private SpinWithWagers generateOutcome() {
+    List<PocketDto> pockets = this.pockets.getValue();
+    int selection = rng.nextInt(pockets.size());
+    PocketDto pocket = pockets.get(selection);
+    ColorDto color = pocket.getColorDto();
+    Map<WagerSpot, Integer> wagers = this.wagers.getValue();
+    SpinWithWagers spin = new SpinWithWagers();
+    spin.setValue(pockets.get(selection).getName());
+    for (Map.Entry<WagerSpot, Integer> wagerEntry : wagers.entrySet()) {
+      WagerSpot spot = wagerEntry.getKey();
+      int amount = wagerEntry.getValue();
+      if (amount > 0) {
+        int payout = 0;
+        Wager wager = new Wager();
+        wager.setAmount(amount);
+        if (spot instanceof PocketDto) {
+          wager.setValue(spot.getName());
+        } else {
+          wager.setColor(((ColorDto) spot).getColor());
+        }
+        if (spot.equals(pocket) || spot.equals(color)) {
+          payout = amount * spot.getPayout();
+        }
+        wager.setPayout(payout);
+        spin.getWagers().add(wager);
+      }
+    }
+    pocketIndex.setValue(selection);
+    rouletteValue.setValue(pocket);
+    return spin;
+  }
+
+  @SuppressWarnings("ConstantConditions")
   public void newGame() {
     currentPot.setValue((long) preferenceRepository.getStartingPot());
     pocketIndex.setValue(0);
     rouletteValue.setValue(pockets.getValue().get(0));
+    Map<WagerSpot, Integer> wagers = this.wagers.getValue();
+    wagers.clear();
+    this.wagers.setValue(wagers);
   }
 
   @SuppressWarnings("ConstantConditions")
@@ -121,7 +155,7 @@ public class PlayViewModel extends AndroidViewModel implements LifecycleObserver
     if (currentWager < maxWager.getValue()) {
       wagers.put(spot, 1 + wagers.getOrDefault(spot, 0));
       this.wagers.setValue(wagers);
-      currentPot.setValue(currentPot.getValue()- 1);
+      currentPot.setValue(currentPot.getValue() - 1);
     }
   }
 
@@ -134,6 +168,19 @@ public class PlayViewModel extends AndroidViewModel implements LifecycleObserver
       this.wagers.setValue(wagers);
       currentPot.setValue(currentWager + currentPot.getValue());
     }
+  }
+
+  @SuppressWarnings("ConstantConditions")
+  private void update(SpinWithWagers spin) {
+    long currentPot = this.currentPot.getValue();
+    for (Wager wager : spin.getWagers()) {
+      currentPot += wager.getPayout();
+    }
+    this.currentPot.postValue(currentPot);
+    // FIXME Doesn't use let-it-ride.
+    Map<WagerSpot, Integer> wagers = this.wagers.getValue();
+    wagers.clear();
+    this.wagers.postValue(wagers);
   }
 
   @SuppressLint("CheckResult")

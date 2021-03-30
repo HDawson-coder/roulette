@@ -42,6 +42,9 @@ public class PlayViewModel extends AndroidViewModel implements LifecycleObserver
   private final CompositeDisposable pending; //to be disposed if app is closed
   private final ConfigurationRepository configurationRepository;
 
+  private Map<WagerSpot, Integer> pendingWagers;
+  private long pendingCurrentPot;
+
   public PlayViewModel(@NonNull Application application) { //Constructor
     super(application);
     spinRepository = new SpinRepository(application);
@@ -114,6 +117,10 @@ public class PlayViewModel extends AndroidViewModel implements LifecycleObserver
     Map<WagerSpot, Integer> wagers = this.wagers.getValue();
     SpinWithWagers spin = new SpinWithWagers();
     spin.setValue(pockets.get(selection).getName());
+    pendingCurrentPot = currentPot.getValue();
+    pendingWagers = new HashMap<>();
+    boolean letItRide = preferenceRepository.isWagerRiding();
+    int maxWager = this.maxWager.getValue();
     for (Map.Entry<WagerSpot, Integer> wagerEntry : wagers.entrySet()) {
       WagerSpot spot = wagerEntry.getKey();
       int amount = wagerEntry.getValue();
@@ -131,6 +138,17 @@ public class PlayViewModel extends AndroidViewModel implements LifecycleObserver
         }
         wager.setPayout(payout);
         spin.getWagers().add(wager);
+        if (letItRide) {
+          if (payout > maxWager) {
+            int difference = payout - maxWager;
+            pendingCurrentPot += difference;
+            pendingWagers.put(spot, maxWager);
+          } else {
+            pendingWagers.put(spot, payout);
+          }
+        } else {
+          pendingCurrentPot += payout;
+        }
       }
     }
     pocketIndex.setValue(selection);
@@ -172,15 +190,10 @@ public class PlayViewModel extends AndroidViewModel implements LifecycleObserver
 
   @SuppressWarnings("ConstantConditions")
   private void update(SpinWithWagers spin) {
-    long currentPot = this.currentPot.getValue();
-    for (Wager wager : spin.getWagers()) {
-      currentPot += wager.getPayout();
-    }
-    this.currentPot.postValue(currentPot);
-    // FIXME Doesn't use let-it-ride.
+    this.currentPot.postValue(pendingCurrentPot);
     Map<WagerSpot, Integer> wagers = this.wagers.getValue();
     wagers.clear();
-    this.wagers.postValue(wagers);
+    this.wagers.postValue(pendingWagers);
   }
 
   @SuppressLint("CheckResult")

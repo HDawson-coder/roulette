@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import edu.cnm.deepdive.roulette.R;
 import edu.cnm.deepdive.roulette.adapter.HistoryAdapter.Holder;
 import edu.cnm.deepdive.roulette.databinding.ItemHistoryBinding;
-import edu.cnm.deepdive.roulette.model.entity.Spin;
 import edu.cnm.deepdive.roulette.model.pojo.SpinWithPayout;
 import java.text.DateFormat;
 import java.util.Date;

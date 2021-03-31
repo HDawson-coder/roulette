@@ -29,4 +29,9 @@
     <item name="android:fontFamily">serif</item>
     <item name="android:textStyle">bold</item>
   </style>
+
+  <style name="TextViewHistory" parent="TextAppearance.AppCompat.Medium">
+    <item name="android:textStyle">bold</item>
+    <item name="fontFamily">cursive</item>
+  </style>
 </resources>

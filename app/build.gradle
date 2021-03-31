@@ -147,6 +147,8 @@ android.applicationVariants.all { variant ->
             linkSource = false
             author = false
             links 'https://docs.oracle.com/javase/8/docs/api/'
+            links 'http://reactivex.io/RxJava/javadoc/'
+            links 'https://www.javadoc.io/doc/com.google.code.gson/gson/latest/'
             linksOffline 'https://developer.android.com/reference', "$projectDir/.."
         }
 
